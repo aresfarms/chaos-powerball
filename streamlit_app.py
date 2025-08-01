@@ -1,19 +1,42 @@
 
 import streamlit as st
-import numpy as np
-import matplotlib.pyplot as plt
+import pandas as pd
+import json
+from itertools import combinations
 
-heatmap_array = np.load("heatmap_array.npy")
-corr_array = np.load("corr_array.npy")
+st.set_page_config(page_title="Chaos Powerball App", layout="wide")
+st.title("🎲 Chaos-Weighted Powerball Prediction Tool")
 
-st.title("🎲 Chaos Powerball Explorer")
+# Load draw stats from local JSON
+try:
+    with open("draw_stats.json", "r") as f:
+        draw_stats = json.load(f)
+except Exception as e:
+    st.error("Failed to load draw statistics.")
+    st.stop()
 
-st.header("📈 Correlation Between Numbers")
-fig_corr, ax_corr = plt.subplots()
-ax_corr.imshow(corr_array, cmap="gray", interpolation="nearest")
-st.pyplot(fig_corr)
+st.markdown("This app generates statistically weighted Powerball combinations based on empirical frequency and chaos modeling.")
 
-st.header("🔥 Heatmap of Number Appearances")
-fig_heat, ax_heat = plt.subplots()
-ax_heat.imshow(heatmap_array, cmap="hot", interpolation="nearest")
-st.pyplot(fig_heat)
+st.header("📊 Suggested Powerball Combinations Based on Frequency")
+
+# Build combinations: 4 most common + 1 least common + 1 powerball
+main_combos = list(combinations(draw_stats["most_common"], 4))
+combinations_data = []
+
+for main in main_combos:
+    for least in draw_stats["least_common"]:
+        five_numbers = list(main) + [least]
+        for pb in draw_stats["powerballs"]:
+            combo = {
+                "Main Numbers": sorted(five_numbers),
+                "Powerball": pb
+            }
+            combinations_data.append(combo)
+
+# Score combinations
+for i, combo in enumerate(combinations_data):
+    combo["Score"] = round(1 - (i / len(combinations_data)), 4)
+
+# Display top 50 combos
+df_combos = pd.DataFrame(combinations_data)
+st.dataframe(df_combos.head(50), use_container_width=True)
