@@ -1,32 +1,28 @@
 
 import streamlit as st
 import pandas as pd
+import math
 
-# Load frequency data
-white_stats = pd.read_csv("white_ball_stats.csv")
-red_stats = pd.read_csv("red_ball_stats.csv")
+def calculate_odds(white_balls, powerball):
+    total_combinations = math.comb(69, 5) * 26
+    selected_combination = 1  # only one exact match
+    odds = selected_combination / total_combinations
+    return odds * 100  # return as percentage
 
-st.title("Chaos Powerball Predictor")
+st.title("🎯 Chaos Powerball Predictor with Odds Breakdown")
 
-st.header("White Ball Frequencies (1–69)")
-st.dataframe(white_stats)
-
-st.header("Red Ball Frequencies (1–26)")
-st.dataframe(red_stats)
-
-st.header("Enter Your Powerball Numbers")
-
-white_balls = []
-for i in range(5):
-    num = st.number_input(f"White Ball #{i+1}", min_value=1, max_value=69, step=1, key=f"white_{i}")
-    white_balls.append(num)
-
-red_ball = st.number_input("Powerball (Red Ball)", min_value=1, max_value=26, step=1, key="red")
+white_balls_input = st.text_input("Enter 5 white balls (1-69) separated by commas:", "")
+powerball_input = st.number_input("Enter Powerball (1-26):", min_value=1, max_value=26, step=1)
 
 if st.button("Calculate Winning Odds"):
-    total_combinations = (69 * 68 * 67 * 66 * 65) / (5 * 4 * 3 * 2 * 1) * 26
-    odds = 1 / total_combinations
-    percent = odds * 100
-    formatted = f"{percent:.12f}%"
-    st.subheader("📊 Estimated Winning Chance")
-    st.success(f"{formatted} chance of hitting the jackpot with this combination.")
+    try:
+        white_balls = [int(x.strip()) for x in white_balls_input.split(",")]
+        if len(white_balls) != 5 or any(b < 1 or b > 69 for b in white_balls):
+            st.error("Please enter exactly 5 valid white ball numbers between 1 and 69.")
+        elif powerball_input < 1 or powerball_input > 26:
+            st.error("Powerball must be between 1 and 26.")
+        else:
+            odds_percentage = calculate_odds(white_balls, powerball_input)
+            st.success(f"Estimated Winning Chance: {odds_percentage:.12f}%")
+    except ValueError:
+        st.error("Invalid input. Please enter numbers only, separated by commas.")
