@@ -1,1 +1,1 @@
-# Streamlit app main file placeholder
+# Streamlit app code placeholder with friendly odds format
