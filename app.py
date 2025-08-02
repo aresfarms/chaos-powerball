@@ -1,30 +1,23 @@
 
 import streamlit as st
 
-def get_friendly_odds(combination):
-    # Simulate checking a Powerball combination and returning human-readable odds
-    odds_dict = {
-        "Powerball only": (1/26, "$4"),
-        "1 white + Powerball": (1/92, "$4"),
-        "2 white + Powerball": (1/701, "$7"),
-        "3 white": (1/579, "$7"),
-        "3 white + Powerball": (1/14494, "$100"),
-        "4 white": (1/36525, "$100"),
-        "4 white + Powerball": (1/913129, "$50,000"),
-        "5 white": (1/11688053, "$1 million"),
-        "5 white + Powerball": (1/292201338, "Jackpot"),
-    }
+st.title("Chaos-Weighted Powerball Predictor")
 
-    results = []
-    for key, (odds, prize) in odds_dict.items():
-        percent = round(odds * 100, 8)
-        one_in_x = round(1 / odds)
-        results.append(f"{key} ({prize}): 1 in {one_in_x} chance ({percent}%)")
-    return results
+st.markdown("### Enter your Powerball combination below:")
 
-st.title("Powerball Odds Calculator")
-st.markdown("### Here's a friendly, percentage-based summary of your Powerball odds and payouts:")
+white_balls = st.text_input("Enter 5 white balls (1-69) separated by commas")
+powerball = st.text_input("Enter Powerball (1-26)")
 
-odds_list = get_friendly_odds(None)
-for line in odds_list:
-    st.write("•", line)
+if st.button("Calculate Odds"):
+    if white_balls and powerball:
+        try:
+            white_numbers = list(map(int, white_balls.split(",")))
+            powerball_number = int(powerball)
+            if len(white_numbers) != 5 or not all(1 <= n <= 69 for n in white_numbers) or not (1 <= powerball_number <= 26):
+                st.error("Invalid numbers. Please ensure white balls are 1–69 and Powerball is 1–26.")
+            else:
+                st.success("Your odds of winning the jackpot with this combination are: Zero (0%)")
+        except ValueError:
+            st.error("Please enter only numbers separated by commas.")
+    else:
+        st.info("Please enter all 6 numbers before calculating.")
